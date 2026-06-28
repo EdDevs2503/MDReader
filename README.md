@@ -16,10 +16,12 @@ with a live preview, and keep a local history of every change.
 | 1 | **Add folders of `.md` / `.mmd`** | _Add Folder_ scans a directory recursively (skipping `node_modules`, `.git`, build dirs) and shows a file tree. Filter files with the search box; rescan or remove each root. |
 | 2 | **Full Mermaid support** | Standalone `.mmd` files render as a diagram; ` ```mermaid ` fenced blocks inside `.md` render inline. Powered by Mermaid v11. |
 | 3 | **Open referenced files on click** | Links to other local files are resolved relative to the current file and opened in the active pane. External links open in your browser. |
-| 4 | **Multiple windows + split layout** | _New Window_ opens an independent OS window; _Split_ adds side-by-side panes, each with its own tabs and view mode. |
+| 4 | **Multiple windows + split layout** | _New Window_ opens an independent OS window; _Split_ adds side-by-side panes, each with its own tabs and view mode. **Drag a tab** to reorder it, move it to another pane, or drop it on a pane's left/right edge to split the layout (VS Code-style). |
 | 5 | **Open console at file location** | The _Console_ button (or right-click a file in the tree) opens your OS terminal in that file's folder. _Reveal_ opens the file manager. |
 | 6 | **History of changes** | Every save stores a timestamped snapshot. The _History_ panel lists versions, diffs a version against the current content, and restores it into the editor. |
 | 7 | **Edit + visualize** | A CodeMirror 6 editor with **Preview / Split / Editor** modes. Edits preview live; **Ctrl/Cmd+S** saves and snapshots. A footer shows unsaved-change status with Save / Revert. |
+| 8 | **Large-diagram navigation** | `.mmd` files open in a **pan & zoom** viewport: scroll to zoom toward the cursor, drag to pan, plus _fit_, _100%_ and _fullscreen_ controls. Inline `mermaid` blocks get an **Expand** button that opens the same viewer. |
+| 9 | **Create new files** | **New File** (button or `Ctrl/Cmd+N`) creates a `.md`/`.mmd` file from a save dialog, seeds a small template, refreshes the tree and opens it. |
 
 ## Tech stack
 
@@ -69,6 +71,7 @@ npm run dist     # package an installer with electron-builder (AppImage/dmg/nsis
 
 | Action | Shortcut |
 |--------|----------|
+| New file | `Ctrl/Cmd+N` |
 | Add folder | `Ctrl/Cmd+O` |
 | Open file | `Ctrl/Cmd+Shift+O` |
 | Save | `Ctrl/Cmd+S` |

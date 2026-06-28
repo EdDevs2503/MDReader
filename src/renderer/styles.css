@@ -303,11 +303,37 @@ kbd {
   min-width: 0;
 }
 .pane {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   border-right: 1px solid var(--border);
+}
+
+/* VS Code-style drop zones shown while dragging a tab over a pane. */
+.drop-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  transition: left 0.08s ease, right 0.08s ease, width 0.08s ease;
+}
+.drop-overlay.region-center {
+  left: 0;
+  right: 0;
+}
+.drop-overlay.region-left {
+  left: 0;
+  width: 50%;
+}
+.drop-overlay.region-right {
+  right: 0;
+  width: 50%;
 }
 .pane:last-child {
   border-right: none;
@@ -632,8 +658,120 @@ kbd {
   max-width: 100%;
   height: auto;
 }
+
+/* Standalone .mmd file: fill the pane with a pan/zoom viewport. */
 .mermaid-file {
+  height: 100%;
+}
+
+/* ---------- Pan & zoom viewport ---------- */
+.panzoom-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 22px 22px;
+  cursor: grab;
+  touch-action: none;
+}
+.panzoom-viewport.panning {
+  cursor: grabbing;
+}
+.panzoom-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+/* Inside the viewport diagrams must keep their natural size for fitting. */
+.panzoom-content .mermaid-diagram {
+  padding: 0;
+}
+.panzoom-content .mermaid-diagram svg {
   max-width: none;
+}
+.panzoom-toolbar {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+.panzoom-toolbar button {
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+}
+.panzoom-level {
+  min-width: 46px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inline mermaid block with an Expand affordance. */
+.mermaid-inline {
+  position: relative;
+}
+.mermaid-inline:hover .mermaid-expand {
+  opacity: 1;
+}
+.mermaid-expand {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+/* Fullscreen diagram overlay (for inline blocks). */
+.diagram-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  backdrop-filter: blur(2px);
+}
+.diagram-modal {
+  width: 90vw;
+  height: 86vh;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.diagram-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.diagram-modal .panzoom-viewport {
+  flex: 1;
 }
 .mermaid-error {
   background: #3a2422;

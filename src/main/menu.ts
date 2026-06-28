@@ -1,6 +1,7 @@
 import { app, Menu, BrowserWindow, type MenuItemConstructorOptions } from 'electron';
 
 export type MenuAction =
+  | 'new-file'
   | 'add-folder'
   | 'open-file'
   | 'save'
@@ -46,6 +47,7 @@ export function buildMenu({ onNewWindow }: MenuDeps): Menu {
     {
       label: 'File',
       submenu: [
+        { label: 'New File…', accelerator: 'CmdOrCtrl+N', click: send('new-file') },
         {
           label: 'New Window',
           accelerator: 'CmdOrCtrl+Shift+N',

@@ -6,7 +6,7 @@ import {
   type IpcMainInvokeEvent,
 } from 'electron';
 import { readFile, writeFile, stat } from 'fs/promises';
-import { basename, dirname, extname, isAbsolute, resolve } from 'path';
+import { basename, dirname, extname, isAbsolute, join, resolve } from 'path';
 import { scanDirectory, isMarkdownFile } from './fsScan';
 import { readHistory, appendHistory } from './history';
 import { openTerminalAt } from './terminal';
@@ -37,6 +37,45 @@ export function registerIpc(createWindow: CreateWindow): void {
     });
     if (result.canceled) return [];
     return result.filePaths;
+  });
+
+  // Create a new markdown/mermaid file via a save dialog and seed it with a
+  // small template based on the chosen extension.
+  ipcMain.handle('dialog:newFile', async (event: IpcMainInvokeEvent, defaultDir?: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender) ?? undefined;
+    const result = await dialog.showSaveDialog(win!, {
+      title: 'New file',
+      defaultPath: defaultDir ? join(defaultDir, 'untitled.md') : 'untitled.md',
+      filters: [
+        { name: 'Markdown', extensions: ['md', 'markdown'] },
+        { name: 'Mermaid', extensions: ['mmd'] },
+      ],
+    });
+    if (result.canceled || !result.filePath) return { ok: false, canceled: true };
+
+    const filePath = result.filePath;
+    const ext = extname(filePath).toLowerCase();
+    try {
+      // Only seed a template when creating a brand-new, empty file.
+      let exists = false;
+      try {
+        await stat(filePath);
+        exists = true;
+      } catch {
+        exists = false;
+      }
+      if (!exists) {
+        const name = basename(filePath, ext);
+        const template =
+          ext === '.mmd'
+            ? 'flowchart TD\n    A[Start] --> B[End]\n'
+            : `# ${name}\n\n`;
+        await writeFile(filePath, template, 'utf8');
+      }
+      return { ok: true, path: filePath };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    }
   });
 
   ipcMain.handle('fs:rescan', async (_e, dirPath: string) => {

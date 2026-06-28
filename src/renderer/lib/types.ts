@@ -58,6 +58,7 @@ export interface TerminalResult {
 }
 
 export type MenuAction =
+  | 'new-file'
   | 'add-folder'
   | 'open-file'
   | 'save'
@@ -66,9 +67,17 @@ export type MenuAction =
   | 'toggle-history'
   | 'toggle-sidebar';
 
+export interface NewFileResult {
+  ok: boolean;
+  path?: string;
+  canceled?: boolean;
+  error?: string;
+}
+
 export interface ElectronAPI {
   openFolderDialog: () => Promise<FolderNode[]>;
   openFilesDialog: () => Promise<string[]>;
+  newFileDialog: (defaultDir?: string) => Promise<NewFileResult>;
   rescanFolder: (dirPath: string) => Promise<FolderNode | null>;
   readFile: (filePath: string) => Promise<ReadFileResult>;
   writeFile: (filePath: string, content: string) => Promise<WriteResult>;

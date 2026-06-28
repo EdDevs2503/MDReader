@@ -1,8 +1,14 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useRef, useState } from 'react';
 import Tabs from './Tabs';
 import MarkdownView from './MarkdownView';
-import { useStore, type Pane as PaneModel, type ViewMode } from '../lib/store';
+import {
+  useStore,
+  type Pane as PaneModel,
+  type ViewMode,
+  type DropRegion,
+} from '../lib/store';
 import { getElectron } from '../lib/electron';
+import { tabDrag } from '../lib/dragState';
 
 // CodeMirror is heavy — load it only when an editor is actually shown.
 const Editor = lazy(() => import('./Editor'));
@@ -43,9 +49,44 @@ export default function Pane({ pane }: PaneProps) {
   const setView = useStore((s) => s.setView);
   const splitPane = useStore((s) => s.splitPane);
   const closePane = useStore((s) => s.closePane);
+  const dropTab = useStore((s) => s.dropTab);
   const saveDoc = useStore((s) => s.saveDoc);
   const revertDoc = useStore((s) => s.revertDoc);
   const openHistory = useStore((s) => s.openHistory);
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const [dropRegion, setDropRegion] = useState<DropRegion | null>(null);
+
+  const regionFromEvent = (e: React.DragEvent): DropRegion => {
+    const rect = sectionRef.current?.getBoundingClientRect();
+    if (!rect) return 'center';
+    const x = (e.clientX - rect.left) / rect.width;
+    if (x < 0.25) return 'left';
+    if (x > 0.75) return 'right';
+    return 'center';
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    if (!tabDrag.current) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDropRegion(regionFromEvent(e));
+  };
+
+  const onDragLeave = (e: React.DragEvent) => {
+    if (sectionRef.current?.contains(e.relatedTarget as Node)) return;
+    setDropRegion(null);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    const payload = tabDrag.current;
+    const region = dropRegion ?? regionFromEvent(e);
+    setDropRegion(null);
+    if (!payload) return;
+    e.preventDefault();
+    dropTab({ ...payload, targetPaneId: pane.id, region });
+    tabDrag.current = null;
+  };
 
   const dirty = !!doc && doc.content !== doc.saved;
   const showEditor = pane.view === 'editor' || pane.view === 'split';
@@ -63,9 +104,14 @@ export default function Pane({ pane }: PaneProps) {
 
   return (
     <section
+      ref={sectionRef}
       className={`pane ${isActivePane ? 'active-pane' : ''}`}
       onMouseDown={() => setActivePane(pane.id)}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
     >
+      {dropRegion && <div className={`drop-overlay region-${dropRegion}`} />}
       <Tabs pane={pane} />
 
       <div className="pane-toolbar">

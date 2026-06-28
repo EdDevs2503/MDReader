@@ -7,6 +7,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 const api = {
   openFolderDialog: () => ipcRenderer.invoke('dialog:openFolder'),
   openFilesDialog: () => ipcRenderer.invoke('dialog:openFiles'),
+  newFileDialog: (defaultDir?: string) => ipcRenderer.invoke('dialog:newFile', defaultDir),
   rescanFolder: (dirPath: string) => ipcRenderer.invoke('fs:rescan', dirPath),
 
   readFile: (filePath: string) => ipcRenderer.invoke('fs:readFile', filePath),

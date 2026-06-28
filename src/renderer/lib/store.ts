@@ -4,6 +4,15 @@ import { getElectron, baseName } from './electron';
 
 export type ViewMode = 'preview' | 'editor' | 'split';
 
+export type DropRegion = 'center' | 'left' | 'right';
+
+export interface TabDropPayload {
+  path: string;
+  fromPaneId: string;
+  targetPaneId: string;
+  region: DropRegion;
+}
+
 export interface DocState {
   path: string;
   name: string;
@@ -38,6 +47,7 @@ interface AppState {
   rescanFolder: (path: string) => Promise<void>;
 
   // documents / tabs
+  createNewFile: () => Promise<void>;
   openFile: (filePath: string, paneId?: string) => Promise<void>;
   reloadFile: (filePath: string) => Promise<void>;
   closeTab: (paneId: string, filePath: string) => void;
@@ -49,6 +59,7 @@ interface AppState {
 
   // panes
   splitPane: () => void;
+  dropTab: (payload: TabDropPayload) => void;
   closePane: (paneId: string) => void;
   setView: (paneId: string, view: ViewMode) => void;
   cycleView: (paneId?: string) => void;
@@ -92,6 +103,21 @@ export const useStore = create<AppState>((set, get) => ({
     const tree = await api.rescanFolder(path);
     if (!tree) return;
     set((s) => ({ folders: s.folders.map((f) => (f.path === path ? tree : f)) }));
+  },
+
+  createNewFile: async () => {
+    const api = getElectron();
+    if (!api) return;
+    const { folders } = get();
+    const res = await api.newFileDialog(folders[0]?.path);
+    if (!res.ok || !res.path) return;
+
+    // If the new file lives inside an added folder, refresh that folder so it
+    // shows up in the tree.
+    const root = get().folders.find((f) => res.path!.startsWith(f.path));
+    if (root) await get().rescanFolder(root.path);
+
+    await get().openFile(res.path);
   },
 
   openFile: async (filePath, paneId) => {
@@ -252,6 +278,60 @@ export const useStore = create<AppState>((set, get) => ({
       };
     });
   },
+
+  dropTab: ({ path, fromPaneId, targetPaneId, region }) =>
+    set((s) => {
+      // Work on shallow clones so we can mutate tabs freely.
+      let panes = s.panes.map((p) => ({ ...p, tabs: [...p.tabs] }));
+      const from = panes.find((p) => p.id === fromPaneId);
+      if (!from) return {};
+
+      // Dropping onto the same pane's center is a no-op beyond focusing.
+      if (region === 'center' && fromPaneId === targetPaneId) {
+        return {
+          activePaneId: targetPaneId,
+          panes: panes.map((p) =>
+            p.id === targetPaneId ? { ...p, activePath: path } : p
+          ),
+        };
+      }
+
+      const removeFromSource = () => {
+        from.tabs = from.tabs.filter((t) => t !== path);
+        if (from.activePath === path) {
+          from.activePath = from.tabs[from.tabs.length - 1] ?? null;
+        }
+      };
+
+      let activePaneId = s.activePaneId;
+
+      if (region === 'left' || region === 'right') {
+        removeFromSource();
+        const id = newPaneId();
+        const newPane: Pane = { id, tabs: [path], activePath: path, view: 'preview' };
+        let targetIndex = panes.findIndex((p) => p.id === targetPaneId);
+        if (targetIndex < 0) targetIndex = panes.length - 1;
+        panes.splice(region === 'left' ? targetIndex : targetIndex + 1, 0, newPane);
+        activePaneId = id;
+      } else {
+        const target = panes.find((p) => p.id === targetPaneId);
+        if (!target) return {};
+        removeFromSource();
+        if (!target.tabs.includes(path)) target.tabs.push(path);
+        target.activePath = path;
+        activePaneId = target.id;
+      }
+
+      // Drop empty panes, but always keep at least one.
+      panes = panes.filter((p) => p.tabs.length > 0 || p.id === activePaneId);
+      if (panes.length === 0) {
+        const id = newPaneId();
+        panes = [{ id, tabs: [], activePath: null, view: 'preview' }];
+        activePaneId = id;
+      }
+
+      return { panes, activePaneId };
+    }),
 
   closePane: (paneId) =>
     set((s) => {
