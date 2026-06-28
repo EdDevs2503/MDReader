@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MDReader — Markdown & Mermaid desktop viewer</title>
+    <meta
+      name="description"
+      content="MDReader is a desktop Markdown (.md) and Mermaid (.mmd) reader, viewer and editor built with Electron + Vite + React. Browse folders, render diagrams, pan & zoom, split panes, edit with live preview and keep change history."
+    />
+    <meta property="og:title" content="MDReader — Markdown & Mermaid desktop viewer" />
+    <meta
+      property="og:description"
+      content="Read, view and edit .md / .mmd files. Pan & zoom diagrams, VS Code-style split panes, live preview and change history."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="brand">
+        <span class="logo">M</span>
+        MDReader
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#stack">Stack</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/EdDevs2503/MDReader">GitHub</a>
+      </div>
+    </nav>
+
+    <header class="hero wrap">
+      <span class="badge">Electron · Vite · React · TypeScript</span>
+      <h1>Read, view &amp; edit <span class="grad">Markdown &amp; Mermaid</span><br />on your desktop</h1>
+      <p>
+        A fast local-file workspace for <code>.md</code> and <code>.mmd</code> files —
+        render diagrams, pan &amp; zoom huge graphs, jump between linked notes, split
+        the layout VS Code-style, and edit with a live preview.
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/EdDevs2503/MDReader">★ View on GitHub</a>
+        <a class="btn" href="#install">Get started</a>
+      </div>
+
+      <!-- Pure-CSS/SVG mockup of the app -->
+      <div class="mockup" aria-hidden="true">
+        <div class="mock-bar"><i></i><i></i><i></i><span>MDReader</span></div>
+        <div class="mock-body">
+          <aside class="mock-side">
+            <div class="grp">Explorer</div>
+            <div class="mock-file"><b class="ic-md">#</b> welcome.md</div>
+            <div class="mock-file active"><b class="ic-mmd">M</b> architecture.mmd</div>
+            <div class="mock-file"><b class="ic-md">#</b> diagrams.md</div>
+            <div class="mock-file" style="padding-left:18px"><b class="ic-md">#</b> notes.md</div>
+          </aside>
+          <div class="mock-pane">
+            <div class="mock-tabs"><div class="mock-tab active">welcome.md</div><div class="mock-tab">diagrams.md</div></div>
+            <div class="mock-content">
+              <h4>Welcome to MDReader</h4>
+              <div class="line w85"></div>
+              <div class="line w70"></div>
+              <div class="line w50"></div>
+              <div class="line w85"></div>
+              <div class="line w70"></div>
+            </div>
+          </div>
+          <div class="mock-pane">
+            <div class="mock-tabs"><div class="mock-tab active">architecture.mmd</div></div>
+            <div class="mock-content mock-diagram">
+              <svg viewBox="0 0 200 150" width="180" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 Z" fill="#60a5fa" />
+                  </marker>
+                </defs>
+                <rect x="60" y="8" width="80" height="26" rx="6" fill="#243044" stroke="#3b82f6" />
+                <text x="100" y="25" fill="#cdd3dd" font-size="10" text-anchor="middle">Renderer</text>
+                <rect x="60" y="62" width="80" height="26" rx="6" fill="#243044" stroke="#3b82f6" />
+                <text x="100" y="79" fill="#cdd3dd" font-size="10" text-anchor="middle">Preload</text>
+                <rect x="60" y="116" width="80" height="26" rx="6" fill="#3a2740" stroke="#c0648b" />
+                <text x="100" y="133" fill="#cdd3dd" font-size="10" text-anchor="middle">Main / IPC</text>
+                <line x1="100" y1="34" x2="100" y2="60" stroke="#60a5fa" stroke-width="2" marker-end="url(#a)" />
+                <line x1="100" y1="88" x2="100" y2="114" stroke="#60a5fa" stroke-width="2" marker-end="url(#a)" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section id="features" class="wrap">
+      <h2 class="section-title">Everything in one window</h2>
+      <p class="section-sub">Built for working with Markdown docs and Mermaid diagrams side by side.</p>
+      <div class="grid">
+        <div class="card"><div class="emoji">📁</div><h3>Add folders</h3><p>Recursively scan directories for <code>.md</code> / <code>.mmd</code> files and browse them in a filterable tree.</p></div>
+        <div class="card"><div class="emoji">🧜</div><h3>Full Mermaid</h3><p>Standalone <code>.mmd</code> files and inline <code>```mermaid</code> blocks render with Mermaid v11.</p></div>
+        <div class="card"><div class="emoji">🔍</div><h3>Pan &amp; zoom</h3><p>Navigate huge diagrams: zoom toward the cursor, drag to pan, fit, 100% and fullscreen — text stays crisp.</p></div>
+        <div class="card"><div class="emoji">🔗</div><h3>Linked files</h3><p>Click a relative link to another document and it opens instantly in the active pane.</p></div>
+        <div class="card"><div class="emoji">🪟</div><h3>Split &amp; windows</h3><p>Drag tabs to reorder, move between panes, or drop on an edge to split — plus independent OS windows.</p></div>
+        <div class="card"><div class="emoji">🖥️</div><h3>Open console</h3><p>Launch your terminal in a file's folder, or reveal it in the file manager, in one click.</p></div>
+        <div class="card"><div class="emoji">🕑</div><h3>Change history</h3><p>Every save snapshots the file. Diff any version against the current content and restore it.</p></div>
+        <div class="card"><div class="emoji">✍️</div><h3>Live editor</h3><p>A CodeMirror 6 editor with Preview / Split / Editor modes and a save-status footer.</p></div>
+        <div class="card"><div class="emoji">➕</div><h3>New files</h3><p>Create a new <code>.md</code> / <code>.mmd</code> from a template with <code>Ctrl/Cmd+N</code>.</p></div>
+      </div>
+    </section>
+
+    <section id="stack" class="wrap">
+      <h2 class="section-title">Built with</h2>
+      <p class="section-sub">A modern, lightweight desktop stack.</p>
+      <div class="stack">
+        <span class="chip">Electron</span>
+        <span class="chip">Vite</span>
+        <span class="chip">React 18</span>
+        <span class="chip">TypeScript</span>
+        <span class="chip">CodeMirror 6</span>
+        <span class="chip">Mermaid 11</span>
+        <span class="chip">react-markdown</span>
+        <span class="chip">Zustand</span>
+      </div>
+    </section>
+
+    <section id="install" class="wrap">
+      <h2 class="section-title">Get started</h2>
+      <p class="section-sub">Clone, install and run in development mode.</p>
+      <div class="code">
+<span class="c"># clone &amp; enter</span>
+git clone https://github.com/EdDevs2503/MDReader.git
+cd MDReader
+
+<span class="c"># install dependencies</span>
+npm install
+
+<span class="c"># launch the app (hot reload)</span>
+npm run dev
+
+<span class="c"># build &amp; package an installer</span>
+npm run dist   <span class="c"># AppImage / dmg / nsis</span>
+      </div>
+    </section>
+
+    <footer>
+      MDReader · MIT License ·
+      <a href="https://github.com/EdDevs2503/MDReader">github.com/EdDevs2503/MDReader</a>
+    </footer>
+  </body>
+</html>
