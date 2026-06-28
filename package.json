@@ -1,6 +1,6 @@
 {
   "name": "mdreader",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A Markdown (.md) and Mermaid (.mmd) reader, viewer and editor built with Electron + Vite + React",
   "author": "EdDevs2503",
   "license": "MIT",
