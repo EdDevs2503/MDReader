@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# MDReader pre-commit hook.
+#
+# Rule: any change to the visual surface of the app (renderer UI components or
+# the global stylesheet) must be accompanied by an update to the documentation
+# that presents those visuals — the README and the GitHub Pages landing page —
+# so they never drift out of sync.
+#
+# This hook is wired via `git config core.hooksPath .claude/hooks`, which the
+# `npm install` "prepare" script sets up automatically.
+#
+# Bypass for genuinely non-visual edits with:  git commit --no-verify
+#
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# What counts as a visual / feature change.
+visual=$(printf '%s\n' "$staged" | grep -E '^src/renderer/components/|^src/renderer/styles\.css$' || true)
+
+# No visual files staged → nothing to enforce.
+[ -z "$visual" ] && exit 0
+
+# Visual change present — require README and/or docs/ to be updated too.
+docs=$(printf '%s\n' "$staged" | grep -E '^README\.md$|^docs/' || true)
+[ -n "$docs" ] && exit 0
+
+echo "────────────────────────────────────────────────────────────────"
+echo " MDReader pre-commit: visual change without doc updates"
+echo "────────────────────────────────────────────────────────────────"
+echo " These staged files change the UI:"
+printf '%s\n' "$visual" | sed 's/^/   • /'
+echo ""
+echo " Please update the presentation docs so they stay in sync:"
+echo "   • README.md         — feature list / shortcuts"
+echo "   • docs/index.html   — GitHub Pages landing page"
+echo ""
+echo " Stage them and commit again."
+echo " Not a visual feature? Bypass with:  git commit --no-verify"
+echo "────────────────────────────────────────────────────────────────"
+exit 1

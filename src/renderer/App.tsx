@@ -22,6 +22,10 @@ export default function App() {
     const handle = async (action: MenuAction) => {
       const state = useStore.getState();
       switch (action) {
+        case 'new-file': {
+          await state.createNewFile();
+          break;
+        }
         case 'add-folder': {
           const folders = await api.openFolderDialog();
           if (folders.length) addFolders(folders);

@@ -1,5 +1,6 @@
 import { useStore, type Pane } from '../lib/store';
 import { baseName } from '../lib/electron';
+import { tabDrag } from '../lib/dragState';
 
 interface TabsProps {
   pane: Pane;
@@ -23,6 +24,15 @@ export default function Tabs({ pane }: TabsProps) {
           <div
             key={path}
             className={`tab ${active ? 'active' : ''}`}
+            draggable
+            onDragStart={(e) => {
+              tabDrag.current = { path, fromPaneId: pane.id };
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/plain', path);
+            }}
+            onDragEnd={() => {
+              tabDrag.current = null;
+            }}
             onClick={() => setActiveTab(pane.id, path)}
             title={path}
           >

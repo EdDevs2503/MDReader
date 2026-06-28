@@ -47,11 +47,12 @@ export default function MarkdownView({ content, filePath, ext, paneId }: Markdow
     [filePath, openFile, paneId]
   );
 
-  // A standalone Mermaid file renders the whole document as one diagram.
+  // A standalone Mermaid file renders the whole document as one interactive
+  // (pan & zoom) diagram that fills the pane.
   if (ext === '.mmd') {
     return (
-      <div className="markdown-body mermaid-file">
-        <Mermaid chart={content} />
+      <div className="mermaid-file">
+        <Mermaid chart={content} interactive />
       </div>
     );
   }
