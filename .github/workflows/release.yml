@@ -39,5 +39,7 @@ jobs:
         env:
           # electron-builder publishes the release with this token.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Don't attempt macOS code-signing (no certificate in CI).
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          # No Apple certificate in CI. Leaving identity auto-discovery enabled
+          # lets electron-builder ad-hoc sign the macOS app, which avoids the
+          # "app is damaged" error on Apple Silicon (it becomes a normal
+          # "unidentified developer" prompt instead).

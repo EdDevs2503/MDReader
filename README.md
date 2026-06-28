@@ -116,6 +116,19 @@ entirely from your machine instead, run `npm run release` locally with a
 
 > Keep `package.json`'s `version` in sync with the tag you push.
 
+### macOS: "app is damaged / unidentified developer"
+
+The macOS build is **not signed with an Apple Developer certificate** (the app
+is ad-hoc signed only), so Gatekeeper warns on first launch. To open it:
+
+```bash
+# after dragging MDReader.app to /Applications
+xattr -dr com.apple.quarantine /Applications/MDReader.app
+```
+
+…or right-click the app → **Open** → **Open**. A fully silent launch requires
+signing + notarization with a paid Apple Developer account.
+
 ## ⌨️ Keyboard shortcuts
 
 | Action | Shortcut |
