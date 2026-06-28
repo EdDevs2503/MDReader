@@ -84,10 +84,37 @@ npm run dev      # launch the app with hot reload
 ### Build & package
 
 ```bash
-npm run build    # compile main + preload + renderer into out/
-npm run start    # run the production build
-npm run dist     # package an installer with electron-builder (AppImage/dmg/nsis)
+npm run build      # compile main + preload + renderer into out/
+npm run start      # run the production build
+npm run dist       # package an installer for your current OS → release/
+npm run dist:linux # AppImage   (build on Linux)
+npm run dist:win   # NSIS .exe  (build on Windows, or Linux/macOS with wine)
+npm run dist:mac   # .dmg       (build on macOS only)
 ```
+
+`electron-builder` writes installers to `release/`. Each OS builds its own
+target (Linux → AppImage, Windows → NSIS, macOS → dmg); macOS `.dmg` can only
+be produced on a Mac.
+
+## 📦 Releases (GitHub)
+
+Releases are automated by [`.github/workflows/release.yml`](.github/workflows/release.yml):
+pushing a version tag builds installers on Linux, macOS **and** Windows in
+parallel and publishes them to a GitHub Release.
+
+```bash
+# 1. bump the version in package.json (e.g. 0.1.0 → 0.2.0), commit it
+# 2. tag and push — this triggers the Release workflow
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+The workflow uses the built-in `GITHUB_TOKEN` (no secrets to configure) and
+`electron-builder --publish always` to attach the artifacts. To cut a release
+entirely from your machine instead, run `npm run release` locally with a
+`GH_TOKEN` env var set to a personal access token.
+
+> Keep `package.json`'s `version` in sync with the tag you push.
 
 ## ⌨️ Keyboard shortcuts
 

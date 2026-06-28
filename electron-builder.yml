@@ -1,11 +1,18 @@
 appId: com.eddevs.mdreader
 productName: MDReader
+artifactName: ${productName}-${version}-${os}-${arch}.${ext}
 directories:
   output: release
   buildResources: build
 files:
   - out/**/*
   - package.json
+# Publish target for `electron-builder --publish` (used by `npm run release`
+# and the Release workflow). Creates/updates a GitHub Release for the tag.
+publish:
+  provider: github
+  owner: EdDevs2503
+  repo: MDReader
 linux:
   target:
     - AppImage
