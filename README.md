@@ -67,7 +67,6 @@ src/
 docs/            GitHub Pages landing page (index.html + styles.css)
 samples/         example .md / .mmd files (cross-links & diagrams)
 .claude/         project rules for Claude + the docs-sync pre-commit hook
-.github/         GitHub Actions (Pages deploy)
 ```
 
 ## 🚀 Getting started
@@ -128,13 +127,13 @@ scanning, rendering, pan/zoom and click-to-open navigation.
 
 ## 🌐 Project website (GitHub Pages)
 
-The landing page lives in [`docs/`](./docs) and deploys via the
-[`Deploy GitHub Pages`](.github/workflows/pages.yml) workflow.
+The landing page lives in [`docs/`](./docs) (a self-contained static site;
+`docs/.nojekyll` disables Jekyll processing).
 
-**Enable it once:** repo **Settings → Pages → Build and deployment → Source:
-“GitHub Actions”**. After that, every push to `master` that touches `docs/`
-publishes to `https://eddevs2503.github.io/MDReader/`.
-(Alternatively, set Source to “Deploy from a branch” → `master` / `/docs`.)
+It is published with branch-based Pages: repo **Settings → Pages → Build and
+deployment → Source: “Deploy from a branch” → `master` / `/docs`**. Every push
+to `master` that changes `docs/` republishes
+`https://eddevs2503.github.io/MDReader/`.
 
 ## 🤝 Contributing
 
