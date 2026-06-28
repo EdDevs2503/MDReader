@@ -23,10 +23,10 @@
       <div class="nav-inner">
         <div class="brand"><span class="wordmark"><span class="md">MD</span>Reader</span></div>
         <div class="nav-links">
+          <a href="#download">Download</a>
           <a href="#features">Features</a>
           <a href="#workflow">Workflow</a>
           <a href="#stack">Stack</a>
-          <a href="#install">Install</a>
           <a class="btn sm" href="https://github.com/EdDevs2503/MDReader">GitHub ↗</a>
         </div>
       </div>
@@ -42,8 +42,8 @@
         history of every change.
       </p>
       <div class="cta">
-        <a class="btn primary" href="https://github.com/EdDevs2503/MDReader">★ Star on GitHub</a>
-        <a class="btn" href="#install">Get started →</a>
+        <a class="btn primary" href="#download">⬇ Download</a>
+        <a class="btn" href="https://github.com/EdDevs2503/MDReader">★ Star on GitHub</a>
       </div>
 
       <div class="benefits">
@@ -109,6 +109,44 @@
         </div>
       </div>
     </header>
+
+    <!-- ===== Download ===== -->
+    <section id="download">
+      <div class="wrap">
+        <div class="kicker">Download</div>
+        <h2 class="section-title">Get MDReader for your device</h2>
+        <p class="section-sub">Free &amp; open source. Your platform is highlighted automatically.</p>
+        <div class="dl-grid">
+          <div class="dl-card" data-os="mac">
+            <span class="dl-badge">Recommended for you</span>
+            <div class="dl-os">🍎</div>
+            <h4>macOS</h4>
+            <p class="hint">Universal · Apple Silicon &amp; Intel · .dmg</p>
+            <a class="btn primary" href="https://github.com/EdDevs2503/MDReader/releases/latest/download/MDReader-mac.dmg">Download</a>
+          </div>
+          <div class="dl-card" data-os="win">
+            <span class="dl-badge">Recommended for you</span>
+            <div class="dl-os">🪟</div>
+            <h4>Windows</h4>
+            <p class="hint">64-bit installer · .exe</p>
+            <a class="btn primary" href="https://github.com/EdDevs2503/MDReader/releases/latest/download/MDReader-windows.exe">Download</a>
+          </div>
+          <div class="dl-card" data-os="linux">
+            <span class="dl-badge">Recommended for you</span>
+            <div class="dl-os">🐧</div>
+            <h4>Linux</h4>
+            <p class="hint">AppImage · x86_64</p>
+            <a class="btn primary" href="https://github.com/EdDevs2503/MDReader/releases/latest/download/MDReader-linux.AppImage">Download</a>
+          </div>
+        </div>
+        <p class="dl-note">
+          Looking for a specific build? See
+          <a href="https://github.com/EdDevs2503/MDReader/releases">all releases</a>.
+          On macOS, right-click the app → <strong>Open</strong> the first time
+          (unsigned app).
+        </p>
+      </div>
+    </section>
 
     <!-- ===== Feature rows ===== -->
     <section id="workflow">
@@ -291,5 +329,19 @@ npm run dist
       <div class="brand" style="justify-content:center"><span class="wordmark"><span class="md">MD</span>Reader</span></div>
       MIT License · <a href="https://github.com/EdDevs2503/MDReader">github.com/EdDevs2503/MDReader</a>
     </footer>
+
+    <script>
+      // Highlight the download card matching the visitor's OS.
+      (function () {
+        var ua = navigator.userAgent || navigator.platform || '';
+        var os = 'mac';
+        if (/Windows|Win64|Win32|WOW64/i.test(ua)) os = 'win';
+        else if (/Android/i.test(ua)) os = 'linux';
+        else if (/Linux|X11/i.test(ua)) os = 'linux';
+        else if (/Mac/i.test(ua)) os = 'mac';
+        var card = document.querySelector('.dl-card[data-os="' + os + '"]');
+        if (card) card.classList.add('recommended');
+      })();
+    </script>
   </body>
 </html>

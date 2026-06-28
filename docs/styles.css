@@ -182,6 +182,29 @@ section { padding: 70px 0; }
 .dl.add { background: rgba(78,201,176,0.16); color: #9be8d8; }
 .dl.del { background: rgba(240,133,125,0.16); color: #f4b1ab; }
 
+/* ---------- Download ---------- */
+.dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 860px; margin: 0 auto; }
+.dl-card {
+  position: relative; text-align: center;
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 22px;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.dl-card:hover { border-color: var(--border-2); transform: translateY(-3px); background: var(--panel); }
+.dl-card.recommended { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 16px 44px rgba(79,124,255,0.18); }
+.dl-badge {
+  display: none; position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.2px;
+  padding: 3px 12px; border-radius: 999px; white-space: nowrap;
+}
+.dl-card.recommended .dl-badge { display: block; }
+.dl-os { font-size: 40px; line-height: 1; margin-bottom: 12px; }
+.dl-card h4 { margin: 0 0 4px; font-size: 18px; }
+.dl-card .hint { color: var(--text-faint); font-size: 12.5px; margin: 0 0 18px; min-height: 32px; }
+.dl-card .btn { width: 100%; justify-content: center; }
+.dl-note { text-align: center; color: var(--text-faint); font-size: 13px; margin: 24px auto 0; max-width: 620px; }
+
+@media (max-width: 760px) { .dl-grid { grid-template-columns: 1fr; max-width: 360px; } }
+
 /* ---------- Feature grid ---------- */
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; max-width: 1000px; margin: 0 auto; }
 .card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease; }

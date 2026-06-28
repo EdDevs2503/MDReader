@@ -1,6 +1,7 @@
 appId: com.eddevs.mdreader
 productName: MDReader
-artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+# Stable, version-less artifact names so the website's
+# "releases/latest/download/<file>" links always point at the newest build.
 directories:
   output: release
   buildResources: build
@@ -16,16 +17,19 @@ publish:
   # Publish releases directly instead of leaving them as drafts.
   releaseType: release
 linux:
+  artifactName: ${productName}-linux.${ext}
   target:
     - AppImage
   category: Utility
 mac:
   # Universal binary so the app runs on both Apple Silicon and Intel Macs.
+  artifactName: ${productName}-mac.${ext}
   target:
     - target: dmg
       arch:
         - universal
   category: public.app-category.developer-tools
 win:
+  artifactName: ${productName}-windows.${ext}
   target:
     - nsis
