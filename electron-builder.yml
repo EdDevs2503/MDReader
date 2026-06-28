@@ -13,6 +13,8 @@ publish:
   provider: github
   owner: EdDevs2503
   repo: MDReader
+  # Publish releases directly instead of leaving them as drafts.
+  releaseType: release
 linux:
   target:
     - AppImage
