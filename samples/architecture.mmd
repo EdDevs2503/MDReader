@@ -1,0 +1,24 @@
+graph TD
+    subgraph Renderer["Renderer (React)"]
+        UI[App / PaneGrid]
+        Store[Zustand Store]
+        MD[MarkdownView + Mermaid]
+        ED[CodeMirror Editor]
+    end
+    subgraph Preload["Preload (contextBridge)"]
+        API[window.electronAPI]
+    end
+    subgraph Main["Main (Electron)"]
+        IPC[IPC Handlers]
+        FS[fsScan]
+        HIST[history]
+        TERM[terminal]
+    end
+    UI --> Store
+    Store --> API
+    MD --> API
+    ED --> Store
+    API --> IPC
+    IPC --> FS
+    IPC --> HIST
+    IPC --> TERM

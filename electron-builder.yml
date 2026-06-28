@@ -1,0 +1,19 @@
+appId: com.eddevs.mdreader
+productName: MDReader
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+linux:
+  target:
+    - AppImage
+  category: Utility
+mac:
+  target:
+    - dmg
+  category: public.app-category.developer-tools
+win:
+  target:
+    - nsis
