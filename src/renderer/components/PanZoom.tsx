@@ -15,65 +15,109 @@ interface PanZoomProps {
 }
 
 const MIN_SCALE = 0.1;
-const MAX_SCALE = 8;
+const MAX_SCALE = 16;
 
 function clampScale(s: number) {
   return Math.min(MAX_SCALE, Math.max(MIN_SCALE, s));
 }
 
 /**
- * A pan & zoom viewport for large content (used for Mermaid diagrams).
- * - Mouse wheel / trackpad: zoom toward the cursor.
- * - Drag: pan the camera.
- * - Toolbar: zoom in/out, fit to screen, reset (100%), fullscreen.
- * Auto-fits the content until the user interacts.
+ * A pan & zoom viewport for SVG content (Mermaid diagrams).
+ *
+ * Zoom is applied by resizing the SVG's own width/height (it carries a
+ * viewBox), NOT via a CSS `transform: scale()`. Scaling a composited layer
+ * would rasterize the SVG once and stretch the bitmap, blurring the text;
+ * resizing the SVG makes the browser re-render it as vector, so it stays
+ * crisp at any zoom. Panning still uses a CSS translate (movement doesn't
+ * blur).
  */
 export default function PanZoom({ children, resetKey, className }: PanZoomProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const interactedRef = useRef(false);
   const panRef = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null);
+  const naturalRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
 
   const [transform, setTransform] = useState({ scale: 1, tx: 0, ty: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const fit = useCallback(() => {
-    const viewport = viewportRef.current;
-    const content = contentRef.current;
-    if (!viewport || !content) return;
-    const cw = content.offsetWidth;
-    const ch = content.offsetHeight;
-    if (cw === 0 || ch === 0) return;
-    const vw = viewport.clientWidth;
-    const vh = viewport.clientHeight;
-    const scale = clampScale(Math.min(vw / cw, vh / ch) * 0.95);
-    const tx = (vw - cw * scale) / 2;
-    const ty = (vh - ch * scale) / 2;
-    setTransform({ scale, tx, ty });
+  const getSvg = () =>
+    contentRef.current?.querySelector('svg') as SVGSVGElement | null;
+
+  // Natural (scale-1) size of the diagram, taken from its viewBox so it stays
+  // constant regardless of the inline width/height we set while zooming.
+  const measureNatural = useCallback(() => {
+    const svg = getSvg();
+    if (!svg) {
+      naturalRef.current = { w: 0, h: 0 };
+      return naturalRef.current;
+    }
+    const vb = svg.viewBox?.baseVal;
+    let w = vb && vb.width > 0 ? vb.width : 0;
+    let h = vb && vb.height > 0 ? vb.height : 0;
+    if (!w || !h) {
+      const r = svg.getBoundingClientRect();
+      w = w || r.width;
+      h = h || r.height;
+    }
+    naturalRef.current = { w, h };
+    return naturalRef.current;
   }, []);
+
+  const applySvgSize = useCallback((scale: number) => {
+    const svg = getSvg();
+    const nat = naturalRef.current;
+    if (!svg || !nat.w || !nat.h) return;
+    svg.style.width = `${nat.w * scale}px`;
+    svg.style.height = `${nat.h * scale}px`;
+    svg.style.maxWidth = 'none';
+  }, []);
+
+  // Keep the SVG size in sync with the current scale.
+  useLayoutEffect(() => {
+    applySvgSize(transform.scale);
+  }, [transform.scale, applySvgSize]);
+
+  const fit = useCallback(() => {
+    const vp = viewportRef.current;
+    if (!vp) return;
+    const nat = measureNatural();
+    if (!nat.w || !nat.h) return;
+    const scale = clampScale(Math.min(vp.clientWidth / nat.w, vp.clientHeight / nat.h) * 0.95);
+    applySvgSize(scale);
+    setTransform({
+      scale,
+      tx: (vp.clientWidth - nat.w * scale) / 2,
+      ty: (vp.clientHeight - nat.h * scale) / 2,
+    });
+  }, [measureNatural, applySvgSize]);
 
   const reset = useCallback(() => {
     interactedRef.current = true;
-    const viewport = viewportRef.current;
-    const content = contentRef.current;
-    if (!viewport || !content) return;
-    const tx = (viewport.clientWidth - content.offsetWidth) / 2;
-    setTransform({ scale: 1, tx: Math.max(tx, 0), ty: 20 });
-  }, []);
+    const vp = viewportRef.current;
+    const nat = measureNatural();
+    if (!vp || !nat.w) return;
+    setTransform({ scale: 1, tx: Math.max((vp.clientWidth - nat.w) / 2, 0), ty: 20 });
+  }, [measureNatural]);
 
-  const zoomBy = useCallback((factor: number) => {
+  const zoomToward = useCallback((px: number, py: number, factor: number) => {
     interactedRef.current = true;
-    const viewport = viewportRef.current;
-    if (!viewport) return;
     setTransform((t) => {
-      const cx = viewport.clientWidth / 2;
-      const cy = viewport.clientHeight / 2;
       const next = clampScale(t.scale * factor);
-      const wx = (cx - t.tx) / t.scale;
-      const wy = (cy - t.ty) / t.scale;
-      return { scale: next, tx: cx - wx * next, ty: cy - wy * next };
+      const wx = (px - t.tx) / t.scale;
+      const wy = (py - t.ty) / t.scale;
+      return { scale: next, tx: px - wx * next, ty: py - wy * next };
     });
   }, []);
+
+  const zoomCenter = useCallback(
+    (factor: number) => {
+      const vp = viewportRef.current;
+      if (!vp) return;
+      zoomToward(vp.clientWidth / 2, vp.clientHeight / 2, factor);
+    },
+    [zoomToward]
+  );
 
   // Auto-fit on mount and whenever the content changes, until the user interacts.
   useLayoutEffect(() => {
@@ -89,22 +133,17 @@ export default function PanZoom({ children, resetKey, className }: PanZoomProps)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey, fit]);
 
-  const onWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    interactedRef.current = true;
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const rect = viewport.getBoundingClientRect();
-    const px = e.clientX - rect.left;
-    const py = e.clientY - rect.top;
-    setTransform((t) => {
+  const onWheel = useCallback(
+    (e: React.WheelEvent) => {
+      e.preventDefault();
+      const vp = viewportRef.current;
+      if (!vp) return;
+      const rect = vp.getBoundingClientRect();
       const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-      const next = clampScale(t.scale * factor);
-      const wx = (px - t.tx) / t.scale;
-      const wy = (py - t.ty) / t.scale;
-      return { scale: next, tx: px - wx * next, ty: py - wy * next };
-    });
-  }, []);
+      zoomToward(e.clientX - rect.left, e.clientY - rect.top, factor);
+    },
+    [zoomToward]
+  );
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     if (e.button !== 0 && e.button !== 1) return;
@@ -129,13 +168,10 @@ export default function PanZoom({ children, resetKey, className }: PanZoomProps)
   }, []);
 
   const toggleFullscreen = useCallback(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      viewport.requestFullscreen?.();
-    }
+    const vp = viewportRef.current;
+    if (!vp) return;
+    if (document.fullscreenElement) document.exitFullscreen();
+    else vp.requestFullscreen?.();
   }, []);
 
   useEffect(() => {
@@ -157,21 +193,19 @@ export default function PanZoom({ children, resetKey, className }: PanZoomProps)
       <div
         ref={contentRef}
         className="panzoom-content"
-        style={{
-          transform: `translate(${transform.tx}px, ${transform.ty}px) scale(${transform.scale})`,
-        }}
+        style={{ transform: `translate(${transform.tx}px, ${transform.ty}px)` }}
       >
         {children}
       </div>
 
       <div className="panzoom-toolbar" onPointerDown={(e) => e.stopPropagation()}>
-        <button onClick={() => zoomBy(1 / 1.25)} title="Zoom out (scroll down)">
+        <button onClick={() => zoomCenter(1 / 1.25)} title="Zoom out (scroll down)">
           −
         </button>
-        <span className="panzoom-level" onClick={() => reset()} title="Reset to 100%">
+        <span className="panzoom-level" onClick={reset} title="Reset to 100%">
           {Math.round(transform.scale * 100)}%
         </span>
-        <button onClick={() => zoomBy(1.25)} title="Zoom in (scroll up)">
+        <button onClick={() => zoomCenter(1.25)} title="Zoom in (scroll up)">
           +
         </button>
         <button onClick={fit} title="Fit to screen">

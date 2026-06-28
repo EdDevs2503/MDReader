@@ -684,8 +684,6 @@ kbd {
   position: absolute;
   top: 0;
   left: 0;
-  transform-origin: 0 0;
-  will-change: transform;
 }
 /* Inside the viewport diagrams must keep their natural size for fitting. */
 .panzoom-content .mermaid-diagram {
